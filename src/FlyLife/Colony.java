@@ -1,6 +1,5 @@
 package FlyLife;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -11,43 +10,54 @@ public class Colony {
 	private final Random seed;
 	private final FlyFactory flyFactory;
 	private final Set<Fly> population;
-	private final Queue<Fly> pendingMates;
+	private final Queue<Fly> queue;
+	
+	public static final int MAX_POPULATION = 2000000;
+	public static final int MAX_LIFE_SPAN = 50;
+	public static final int MAX_CHILDREN_COUNT = 1;
 
 	public Colony(Random seed) {
 		this.seed = seed;
 		this.flyFactory = new FlyFactory(seed);
 		this.population = new HashSet<>();
-		this.pendingMates = new LinkedList<>();
-	}
-	
-	private void initializePopulation() {
-		Fly f1 = flyFactory.createGenesisFly();
-		Fly f2 = flyFactory.createGenesisFly();
-		pendingMates.add(f1);
-		pendingMates.add(f2);
-		population.add(f1);
-		population.add(f2);
+		this.queue = new LinkedList<>();
 	}
 
-	public void genesis() {
-		initializePopulation();
+	public void genesis(DirectDrawDemo panel) {
 		
-		while (pendingMates.size() > 1) {
-			Fly f1 = pendingMates.remove(), f2 = pendingMates.remove();
-			Collection<Fly> children = flyFactory.createChildren(f1, f2);
-			for (Fly c : children) {
-				population.add(c);
-				if (c.hasMate()) {
-					pendingMates.add(c);
-				}
+		queue.add(flyFactory.createGenesisFly());
+
+		while (!queue.isEmpty()) {
+			Fly f = queue.remove();
+			if (f.needsMate()) {
+				Fly mate = flyFactory.createMateFor(f);
+				f.mateId = mate.id;
+				queue.add(mate);
+				queue.addAll(flyFactory.createChildren(f));
 			}
-			
-			if (population.size() > 100) { break; }
+			if (f.parentId == 0) {
+				Fly parent = flyFactory.createParentFor(f);
+				f.parentId = parent.id;
+				queue.add(parent);
+			}
+			population.add(f);
+			panel.drawFly(f, seed);
+
+			if (population.size() > MAX_POPULATION) { break; }
 		}
-		
-		print();
+
+		System.out.println("remaining " + queue.size());
+		int max = 0;
+		while (!queue.isEmpty()) {
+			Fly f = queue.remove();
+			if (f.birthday > max) {
+				max = f.birthday;
+			}
+		}
+		System.out.println("max birthday: " + max);
+		//print();
 	}
-	
+
 	private void print() {
 		for (Fly f : population) {
 			f.print();

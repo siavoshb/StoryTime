@@ -10,10 +10,8 @@ import java.util.Random;
 public class Grammar {
 	public static interface Event {}
 
-	enum INTERMEDIATE implements Event { START, ANY, NO_MATE, MATE_LIFE;}
-	enum TERMINAL implements Event { BORN, FLY, EAT, MATE, SLEEP, DIE, NOOP;}
-	
-	private final int maxLifeSpan = 10;
+	public enum INTERMEDIATE implements Event { START, ANY, NO_MATE, MATE_LIFE;}
+	public enum TERMINAL implements Event { BORN, FLY, EAT, MATE, SLEEP, DIE, NOOP;}
 	
 	public static final Map<Event, List<Event[]>> PRODUCTIONS;
 	
@@ -36,12 +34,12 @@ public class Grammar {
 		anyRules.add(new Event[]{TERMINAL.NOOP});
 		PRODUCTIONS.put(INTERMEDIATE.ANY, anyRules);
 
-		List<Event[]> monogomyRules = new ArrayList<>();
-		monogomyRules.add(new Event[]{TERMINAL.FLY, INTERMEDIATE.NO_MATE});
-		monogomyRules.add(new Event[]{TERMINAL.EAT, INTERMEDIATE.NO_MATE});
-		monogomyRules.add(new Event[]{TERMINAL.SLEEP, INTERMEDIATE.NO_MATE});
-		monogomyRules.add(new Event[]{TERMINAL.NOOP});
-		PRODUCTIONS.put(INTERMEDIATE.NO_MATE, monogomyRules);
+		List<Event[]> noMateRules = new ArrayList<>();
+		noMateRules.add(new Event[]{TERMINAL.FLY, INTERMEDIATE.NO_MATE});
+		noMateRules.add(new Event[]{TERMINAL.EAT, INTERMEDIATE.NO_MATE});
+		noMateRules.add(new Event[]{TERMINAL.SLEEP, INTERMEDIATE.NO_MATE});
+		noMateRules.add(new Event[]{TERMINAL.NOOP});
+		PRODUCTIONS.put(INTERMEDIATE.NO_MATE, noMateRules);
 	}
 	
 	private Random rand;
@@ -51,12 +49,12 @@ public class Grammar {
 	}
 	
 	public Event[] generateLifeHistory(Event start) {
-		List<Event> singleLife = new ArrayList<>();
-		singleLife.add(start);
+		List<Event> life = new ArrayList<>();
+		life.add(start);
 
 		boolean needsFurtherExpansion;
 		do {
-			ListIterator<Event> listIterator = singleLife.listIterator();
+			ListIterator<Event> listIterator = life.listIterator();
 			needsFurtherExpansion = false;
 			while (listIterator.hasNext()) {
 				Event currentNode = listIterator.next();
@@ -73,14 +71,28 @@ public class Grammar {
 					}	
 				}
 			}
-		} while (needsFurtherExpansion && (singleLife.size() < maxLifeSpan));
+		} while (needsFurtherExpansion && (life.size() < Colony.MAX_LIFE_SPAN));
 
-		return singleLife.stream().toArray(Event[]::new);
+		
+		
+		removeIntermediates(life);
+		
+		return life.stream().toArray(Event[]::new);
 	}
 
 	private Event[] expand(Event n) {
 		List<Event[]> expansion1 = Grammar.PRODUCTIONS.get(n);
 		Event[] expansion2 = expansion1.get(rand.nextInt(expansion1.size()));
 		return expansion2;
+	}
+	
+	private void removeIntermediates(List<Event> life) {
+		ListIterator<Event> listIterator = life.listIterator();
+		while (listIterator.hasNext()) {
+			Event currentNode = listIterator.next();
+			if (currentNode instanceof INTERMEDIATE) {
+				listIterator.remove();
+			}
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package FlyLife;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
@@ -8,7 +9,7 @@ import FlyLife.Grammar.INTERMEDIATE;
 
 public class FlyFactory {
 	
-	private static int MAX_CHILDREN_COUNT = 10;
+	// TODO reduce creation of mates, re-use those on queue
 	
 	private Random rand;
 	private Grammar grammar;
@@ -22,47 +23,53 @@ public class FlyFactory {
 	public Fly createGenesisFly() {
 		Fly fly = new Fly();
 		fly.id = globalId++;
-		fly.sex = rand.nextBoolean();
-		fly.parent1Id = 0;
-		fly.parent2Id = 0;
+		fly.mateId = 0;
+		fly.parentId = 0;
 		fly.life = grammar.generateLifeHistory(INTERMEDIATE.MATE_LIFE);
 		fly.birthday = 0;
-		
 		return fly;
 	}
 	
-	public Fly createFlyWithMate(Fly mate) {
+	public Fly createMateFor(Fly mate) {
 		Fly fly = new Fly();
 		fly.id = globalId++;
-		fly.sex = rand.nextBoolean();
-		fly.parent1Id = 0;
-		fly.parent2Id = 0;
+		fly.mateId = mate.id;
+		fly.parentId = 0;
 		fly.life = grammar.generateLifeHistory(INTERMEDIATE.MATE_LIFE);
-		//fly.birthday = Arrays.asList(fly.life).indexOf(INTERMEDIATE.MATE_LIFE);
-		
+		int absoluteMateDay = mate.birthday + Arrays.asList(mate.life).indexOf(Grammar.TERMINAL.MATE);
+		fly.birthday = absoluteMateDay - Arrays.asList(fly.life).indexOf(Grammar.TERMINAL.MATE);		
 		return fly;
 	}
 	
-	public Fly createChild(Fly parent1, Fly parent2) {
+	public Fly createParentFor(Fly child) {
 		Fly fly = new Fly();
 		fly.id = globalId++;
-		fly.sex = rand.nextBoolean();
-		fly.parent1Id = parent1.id;
-		fly.parent2Id = parent2.id;
-		fly.life = grammar.generateLifeHistory(INTERMEDIATE.START);
-		//fly.birthday = Arrays.asList(fly.life).indexOf(INTERMEDIATE.MATE_LIFE);
-		
+		fly.mateId = 0;
+		fly.parentId = 0;
+		fly.life = grammar.generateLifeHistory(INTERMEDIATE.MATE_LIFE);
+		int relativeMateDay = Arrays.asList(fly.life).indexOf(Grammar.TERMINAL.MATE);
+		relativeMateDay = child.birthday  - relativeMateDay;
+		fly.birthday = relativeMateDay;
 		return fly;
 	}
 	
-	public Collection<Fly> createChildren(Fly parent1, Fly parent2)
+	public Fly createChild(Fly parent) {
+		Fly fly = new Fly();
+		fly.id = globalId++;
+		fly.mateId = 0;
+		fly.parentId = parent.id;
+		fly.life = grammar.generateLifeHistory(INTERMEDIATE.START);
+		fly.birthday = parent.birthday + Arrays.asList(parent.life).indexOf(Grammar.TERMINAL.MATE);
+		return fly;
+	}
+	
+	public Collection<Fly> createChildren(Fly parent)
 	{
 		Collection<Fly> children = new HashSet<>();
-		int numChildren =(int)Math.ceil(rand.nextDouble() * MAX_CHILDREN_COUNT);
+		int numChildren = 1; //(int)Math.ceil(rand.nextDouble() * Colony.MAX_CHILDREN_COUNT);
 		for (int i=0; i<numChildren; i++) {
-			children.add(createChild(parent1, parent2));
+			children.add(createChild(parent));
 		}
-			
 		return children;
 	}
 }
