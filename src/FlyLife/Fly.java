@@ -8,6 +8,7 @@ import FlyLife.Grammar.TERMINAL;
 public class Fly {
 	
 	public int id;
+	public int generation;
 	public int birthday;
 	public int parentId;
 	public int mateId;
@@ -26,6 +27,10 @@ public class Fly {
 		}
 		
 		System.out.print("\n");
+	}
+	
+	public int getAbsoluteMateDay() {
+		return birthday + Arrays.asList(life).indexOf(TERMINAL.MATE);
 	}
 
 }

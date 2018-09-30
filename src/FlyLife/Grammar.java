@@ -71,9 +71,7 @@ public class Grammar {
 					}	
 				}
 			}
-		} while (needsFurtherExpansion && (life.size() < Colony.MAX_LIFE_SPAN));
-
-		
+		} while (needsFurtherExpansion); // && (life.size() < Colony.MAX_LIFE_SPAN));
 		
 		removeIntermediates(life);
 		

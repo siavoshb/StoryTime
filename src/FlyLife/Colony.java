@@ -11,10 +11,11 @@ public class Colony {
 	private final FlyFactory flyFactory;
 	private final Set<Fly> population;
 	private final Queue<Fly> queue;
-	
-	public static final int MAX_POPULATION = 2000000;
-	public static final int MAX_LIFE_SPAN = 50;
-	public static final int MAX_CHILDREN_COUNT = 1;
+
+	public static final int MAX_POPULATION = 100;
+	//public static final int MAX_LIFE_SPAN = 50;
+	public static final int MIN_CHILDREN_COUNT = 2;
+	public static final int MAX_CHILDREN_COUNT = 5;
 
 	public Colony(Random seed) {
 		this.seed = seed;
@@ -23,38 +24,71 @@ public class Colony {
 		this.queue = new LinkedList<>();
 	}
 
+	public Set<Fly> getPopulation() {
+		return population;
+	}
+
+	public Fly getMate(Queue<Fly> q, Fly elig) {
+		java.util.Iterator<Fly> iterator = q.iterator(); 
+		while (iterator.hasNext()) {
+			Fly f = iterator.next();
+			if (f.needsMate()) {
+				if (f.getAbsoluteMateDay() == elig.getAbsoluteMateDay())
+					iterator.remove();
+				return f;
+			}
+		}
+		return null;
+	}
+
 	public void genesis(DirectDrawDemo panel) {
-		
+
 		queue.add(flyFactory.createGenesisFly());
 
-		while (!queue.isEmpty()) {
+		boolean nomore = false;
+		
+		while (!queue.isEmpty()) { 
 			Fly f = queue.remove();
-			if (f.needsMate()) {
-				Fly mate = flyFactory.createMateFor(f);
+			if (f.needsMate() && population.size() < MAX_POPULATION) {
+				// try to take mate from queue
+				Fly mate = getMate(queue, f);
+				if (mate == null) {
+					mate = flyFactory.createMateFor(f);
+				}
 				f.mateId = mate.id;
 				queue.add(mate);
 				queue.addAll(flyFactory.createChildren(f));
 			}
-			if (f.parentId == 0) {
+			/*if (f.parentId == 0) {
 				Fly parent = flyFactory.createParentFor(f);
 				f.parentId = parent.id;
 				queue.add(parent);
-			}
+			}*/
 			population.add(f);
-			panel.drawFly(f, seed);
+			if (panel!=null) {
+				panel.drawFly(f, seed);
+			}
 
-			if (population.size() > MAX_POPULATION) { break; }
+			if (nomore) { break; }
 		}
+		
+		
 
+		System.out.println("population " + population.size());
 		System.out.println("remaining " + queue.size());
-		int max = 0;
+		int max = 0, maxg = 0;
+
 		while (!queue.isEmpty()) {
 			Fly f = queue.remove();
 			if (f.birthday > max) {
 				max = f.birthday;
 			}
+			if (f.generation > maxg) {
+				maxg = f.generation;
+			}
 		}
 		System.out.println("max birthday: " + max);
+		System.out.println("max gen: " + maxg);
 		//print();
 	}
 
