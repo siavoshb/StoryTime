@@ -77,7 +77,6 @@ analogous to if emotions are sad those grammars replaced with larger movements, 
 	{
 		Collection<Fly> children = new HashSet<>();
 		int numChildren = ThreadLocalRandom.current().nextInt(Colony.MIN_CHILDREN_COUNT, Colony.MAX_CHILDREN_COUNT + 1);
-		System.out.println(numChildren);
 		for (int i=0; i<numChildren; i++) {
 			children.add(createChild(parent));
 		}

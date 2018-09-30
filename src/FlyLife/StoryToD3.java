@@ -41,11 +41,13 @@ public class StoryToD3 {
 	public void saveAsJson(Set<Fly> flies) throws IOException {
 		Random rand = new Random(1);
 		D3NodeData data = new D3NodeData();
-		
+
 		for (Fly f : flies) {
 			int y = (int)(Math.floor(rand.nextDouble() * 500));
 			data.nodes.add(new D3Node(f.id, f.generation*10, y));
-			data.links.add(new D3Link(f.id, f.parentId));
+			if (f.parentId > 0) {
+				data.links.add(new D3Link(f.id, f.parentId));
+			}
 		}
 
 
