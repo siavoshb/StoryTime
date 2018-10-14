@@ -65,7 +65,7 @@ analogous to if emotions are sad those grammars replaced with larger movements, 
 	public Fly createChild(Fly parent) {
 		Fly fly = new Fly();
 		fly.id = globalId++;
-		fly.generation = parent.generation++;
+		fly.generation = parent.generation + 1;
 		fly.mateId = 0;
 		fly.parentId = parent.id;
 		fly.life = grammar.generateLifeHistory(INTERMEDIATE.START);

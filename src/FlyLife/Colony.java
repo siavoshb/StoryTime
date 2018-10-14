@@ -12,10 +12,10 @@ public class Colony {
 	private final Set<Fly> population;
 	private final Queue<Fly> queue;
 
-	public static final int MAX_POPULATION = 40;
+	public static final int MAX_POPULATION = 100;
 	//public static final int MAX_LIFE_SPAN = 50;
 	public static final int MIN_CHILDREN_COUNT = 2;
-	public static final int MAX_CHILDREN_COUNT = 15;
+	public static final int MAX_CHILDREN_COUNT = 7;
 
 	public Colony(Random seed) {
 		this.seed = seed;

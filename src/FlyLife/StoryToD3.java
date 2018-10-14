@@ -5,20 +5,19 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class StoryToD3 {
 
 	public static class D3Node {
 		String id;
-		int x, y;
-		public D3Node(int id, int x, int y) {
+		int group;
+		public D3Node(int id, int group) {
 			this.id = String.valueOf(id);
-			this.x = x;
-			this.y = y;
+			this.group = group;
 		}
 	}
 
@@ -39,17 +38,14 @@ public class StoryToD3 {
 	}
 
 	public void saveAsJson(Set<Fly> flies) throws IOException {
-		Random rand = new Random(1);
 		D3NodeData data = new D3NodeData();
 
 		for (Fly f : flies) {
-			int y = (int)(Math.floor(rand.nextDouble() * 500));
-			data.nodes.add(new D3Node(f.id, f.generation*10, y));
+			data.nodes.add(new D3Node(f.id, f.generation));
 			if (f.parentId > 0) {
 				data.links.add(new D3Link(f.id, f.parentId));
 			}
 		}
-
 
 		try (Writer writer = new FileWriter("display/graph.json")) {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
